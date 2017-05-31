@@ -4,7 +4,7 @@ from math import exp
 from math import sin
 from math import cos
 
-height = 1000
+height = 1920
 width = int(height* 16/9)
 
 area = 3
@@ -12,9 +12,9 @@ areaX = area * 16/9
 xshift = 0
 yshift = 0
 
-paletteSize = 200
-radius = 5
-colorScheme = 4
+paletteSize = 100
+radius = 1000
+colorScheme = 6
 
 minX = -(areaX/2) + xshift
 maxX = areaX/2 + xshift
@@ -28,8 +28,6 @@ black = [0,0,0]
 white = [120,120,120]
 red = [0,0,255]
 
-
-
 img = np.zeros([height,width,3])*150
 l = []
 
@@ -37,22 +35,22 @@ def calculateColor(x, y, palette):
     re = x
     im = y
     for i in range(paletteSize):
-        tempRe = re*re - im*im + 0.285
-        im = 2* re* im + 0.01
-        re = tempRe
-        # tempRe = re*re*re - 3*re*im*im;
-        # im = 3*re*re*im - im*im*im;
-        # re = tempRe;
+        # tempRe = re*re - im*im + 0.285
+        # im = 2* re* im + 0.01
+        # re = tempRe
+        tempRe = re*re*re - 3*re*im*im;
+        im = 3*re*re*im - im*im*im;
+        re = tempRe;
       
-        # try:
-        #     tempRe = exp(re) * cos(im) - 0.621
+        try:
+            tempRe = exp(re) * cos(im) - 0.621
         
-        #     im = exp(re) * sin(im)
-        #     re = tempRe
-        # except:
-        #     im = radius
-        #     re = radius
-        #l.append([re,im])
+            im = exp(re) * sin(im)
+            re = tempRe
+        except:
+            im = radius
+            re = radius
+        
 
         
         if re*re + im*im > radius:
@@ -73,7 +71,7 @@ def createPalette():
     secDivision = 1
     top = 255 #255
     ################################################
-
+    
     palette = [[0 for pSize in range(3)] for y in range(paletteSize)]
     inRange = int(paletteSize/4)
     fullIncRange = top/inRange
@@ -88,8 +86,78 @@ def createPalette():
         for i in range(paletteSize):
             val = i*255/paletteSize
             palette[i] = [val, val, val]
+    elif colorScheme is 6:
+        inRange = int((0.45* paletteSize)/5)
+        lvl0 = int(paletteSize * 0.55)
+        lvl1 = inRange
+        lvl2 = inRange * 2
+        lvl3 = inRange * 3
+        lvl4 = inRange * 4
+        #lvl5 = inRange * 5
+
+        inc1 = (157-75)/inRange
+        inc2 = (180-115)/inRange
+        inc3 = (220-185)/inRange
+        inc4 = (175-95)*2/paletteSize
         
+        green = lambda i,inc1,inc2: [157 - i*inc1, 220 - i*inc3, 180 - i*inc2]
+        blue  = lambda i,inc1,inc2: [220 - i*inc3, 180 - i*inc2, 157 - i*inc1]
+        purple= lambda i,inc1,inc2: [220 - i*inc3, 157 - i*inc1, 180 - i*inc2]
+        red   = lambda i,inc1,inc2: [180 - i*inc2, 157 - i*inc1, 220 - i*inc3]
+        orange= lambda i,inc1,inc2: [157 - i*inc1, 180 - i*inc2, 220 - i*inc3]  #[75,115, 185]
+        gray  = lambda i,inc1,inc2: [180 - i*inc2, 180 - i*inc2, 180 - i*inc2]
+
+        
+        for i in range(lvl0):
+            palette[i] = [100+i*inc4, 100+i*inc4,100+i*inc4]
+        
+        addVal = lvl0 + 0
+        addVal = int(addVal)
+        # inRangeTemp = int(inRange + 0.15*inRange)
+        # inc1Temp = inc1*inRange/inRangeTemp
+        # inc2Temp = inc2*inRange/inRangeTemp
+        for i in range(inRange):
+            palette[i + addVal] = red(i,inc1,inc2)
+
+        addVal = lvl0 + lvl1# + inRange*0.15
+        addVal = int(addVal)
+        # inRangeTemp = int(inRange - 0.3*inRange)
+        # inc1Temp = inc1*inRange/inRangeTemp
+        # inc2Temp = inc2*inRange/inRangeTemp
+        for i in range(inRange):
+            palette[i + addVal] = blue(i,inc1,inc2)
+            
+        addVal = lvl0 + lvl2# - inRange*0.15
+        addVal = int(addVal)
+        # inRangeTemp = int(inRange + 0.2*inRange)
+        # inc1Temp = inc1*inRange/inRangeTemp
+        # inc2Temp = inc2*inRange/inRangeTemp
+        for i in range(inRange):
+            palette[i + addVal] = purple(i,inc1,inc2)
+            
+        addVal = lvl0 + lvl3
+        addVal = int(addVal)
+        for i in range(inRange):
+            palette[i + addVal] = orange(i,inc1,inc2)
+            
+        addVal = lvl0 + lvl4
+        addVal = int(addVal)
+        #print(addVal+inRange)
+        for i in range(inRange):
+            palette[i + addVal] = green(i,inc1,inc2)
+            
+        # addVal = paletteSize/2 + lvl5
+        # for i in range(inRange):
+        #     palette[i + addVal] = gray(i)
     else:
+        inRange = int(paletteSize/4)
+        fullIncRange = top/inRange
+        halfIncRange = top/(inRange*2)
+        lvl1 = inRange
+        lvl2 = inRange * 2
+        lvl3 = inRange * 3
+        secDivInRange = secDivision*inRange
+        isecDivInRange = (1-secDivInRange)*inRange
         for i in range(inRange):
             if colorScheme is 1:
                 palette[i][0] = fullIncRange * i
@@ -189,3 +257,4 @@ def genImg(img):
             img[y,x,2] = color[2]
 
     return img
+            
